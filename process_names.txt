@@ -1,2 +1,3 @@
 Discord.exe
 chrome.exe
+Code.exe
