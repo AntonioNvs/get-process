@@ -3,7 +3,7 @@ from datetime import datetime
 from database.process_database import ProcessDatabase
 from time import sleep
 
-class ManipulationProcess(GetProcess):
+class AnalysisProcess(GetProcess):
   def __init__(self, database: ProcessDatabase) -> None:
       super().__init__()
 
@@ -88,7 +88,6 @@ class ManipulationProcess(GetProcess):
         self.database.end_process(self.process[name]['id'])
         self.process[name] = {}
 
-    print(self.process)
   def datetime_to_int(self, date: datetime) -> int:
     return int(date.strftime('%Y%m%d%H%M%S'))
 
@@ -102,7 +101,7 @@ class ManipulationProcess(GetProcess):
 
 
 if __name__ == '__main__':
-  class_process = ManipulationProcess(ProcessDatabase())
+  class_process = AnalysisProcess(ProcessDatabase())
 
   while True:
     class_process.fill_info_about_process()
