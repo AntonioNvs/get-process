@@ -7,8 +7,10 @@ class AnalysisProcess(GetProcess):
   def __init__(self, database: ProcessDatabase) -> None:
       super().__init__()
 
-      self.time_for_update = 10 # Tempo em segundos
+      self.time_for_update = 45 # Tempo em segundos
       self.database = database
+      self.name_file_with_name_process = 'process_names.txt'
+      self.files_updated = 0
 
       # Lista dos nomes dos processos desejados
       self.process_names: list(str) = []
@@ -21,7 +23,7 @@ class AnalysisProcess(GetProcess):
 
 
   def set_process_names(self):
-    with open('process_names.txt', 'r') as file:
+    with open(self.name_file_with_name_process, 'r') as file:
       self.process_names = [name.strip() for name in file.read().split('\n')]
 
   
@@ -30,7 +32,7 @@ class AnalysisProcess(GetProcess):
 
 
     for name in self.process_names:
-      process[name] = self.create_an_empty_dict()
+      process[name] = dict()
 
     return process
 
@@ -51,7 +53,7 @@ class AnalysisProcess(GetProcess):
       if name in self.process_names:
         # Caso o processo esteja vazio, crie um novo com os parâmetros
         if self.process[name] == {}:
-          self.process = self.create_an_empty_dict()
+          self.process[name] = self.create_an_empty_dict()
 
         # Salvando as informações do processo
         for attribute, value in info_process.items():
@@ -65,6 +67,8 @@ class AnalysisProcess(GetProcess):
           self.execute_update(name)
 
           self.process[name]['date_updated'] = date_now
+
+          self.files_updated += 1
 
         # Criando o processo na base de dados caso ele não tenha sido criado ainda
         if 'id' not in self.process[name]:
@@ -87,6 +91,15 @@ class AnalysisProcess(GetProcess):
         name = self.process_names[i]
         self.database.end_process(self.process[name]['id'])
         self.process[name] = {}
+
+  # Função para encerrar os processos caso o programa seja interrompido
+  def end_process(self):
+    for name in self.process:
+      try:
+        self.database.end_process(self.process[name]['id'])
+      except KeyError:
+        pass
+
 
   def datetime_to_int(self, date: datetime) -> int:
     return int(date.strftime('%Y%m%d%H%M%S'))

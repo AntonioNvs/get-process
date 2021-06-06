@@ -1,0 +1,2 @@
+dictt = {}
+print(dictt == {})
