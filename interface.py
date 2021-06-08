@@ -2,7 +2,7 @@ from analysis_process import AnalysisProcess
 from database.process_database import ProcessDatabase
 
 from threading import Thread
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 import os, sys
 import msvcrt as m
 import time
@@ -25,6 +25,8 @@ class Interface(AnalysisProcess):
   def print_in_screen(self):
     while not self.is_exit:
       os.system('cls')
+      print('Aperte "q" para finalizar o programa!')
+      print()
       print(self.seconds_to_time())
       print(f'Dados já capturados: {self.files_updated}')
       print()
@@ -54,18 +56,31 @@ class Interface(AnalysisProcess):
       print(f'TAREFAS ATIVAS: {len(task_actives)}\n')
 
       for task in task_actives:
-        print(task)
+        now = datetime.now()
+        init = self.process[task]['date_init']
+        
+        print(f'{task} - {self.subtration_beetween_two_datetimes(init, now)}')
 
       time.sleep(1)
 
+  def subtration_beetween_two_datetimes(self, start: datetime, stop: datetime):
+    start_delta = timedelta(hours=start.hour, minutes=start.minute, seconds=start.second)
+    stop_delta = timedelta(hours=stop.hour, minutes=stop.minute, seconds=stop.second)
+
+    return stop_delta - start_delta
+
   # Transformando segundos em tempo de HH/MM/SS
-  def seconds_to_time(self) -> str:
+  def seconds_to_time(self, default_time = None) -> str:
     seconds = int(time.clock())
+
+    if default_time is not None:
+      seconds = default_time
+
     hours = int(seconds / 3600)
-    minutes = int(seconds / 60)
+    minutes = int((seconds % 3600) / 60)
     seconds = seconds % 60
 
-    return f'{hours if hours > 10 else f"0{hours}"}:{minutes if minutes > 10 else f"0{minutes}"}:{seconds if seconds > 10 else f"0{seconds}"}'
+    return f'{hours if hours >= 10 else f"0{hours}"}:{minutes if minutes >= 10 else f"0{minutes}"}:{seconds if seconds >= 10 else f"0{seconds}"}'
 
   # Thread do processo de looping
   def loop_process(self):

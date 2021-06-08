@@ -23,3 +23,7 @@ class GetProcess:
 
   def get_info_pc(self):
     return psutil.cpu_percent(), psutil.virtual_memory().percent
+
+
+if __name__ == "__main__":
+  x = GetProcess()

@@ -2,3 +2,6 @@ Discord.exe
 chrome.exe
 Code.exe
 python3.exe
+Notion.exe
+RocketLeague.exe
+pycharm64.exe

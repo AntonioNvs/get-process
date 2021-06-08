@@ -7,9 +7,10 @@ class AnalysisProcess(GetProcess):
   def __init__(self, database: ProcessDatabase) -> None:
       super().__init__()
 
-      self.time_for_update = 45 # Tempo em segundos
+      self.time_for_update = 90 # Tempo em segundos
       self.database = database
       self.name_file_with_name_process = 'process_names.txt'
+      self.name_all_task_pc = 'all_info_pc'
       self.files_updated = 0
 
       # Lista dos nomes dos processos desejados
@@ -17,6 +18,8 @@ class AnalysisProcess(GetProcess):
       self.set_process_names()
 
       self.process: dict = self.make_the_dict_of_process()
+      self.process[self.name_all_task_pc] = self.create_an_empty_dict()
+      self.process[self.name_all_task_pc]['id'] = self.database.create_process(self.name_all_task_pc)
 
       # Variável de controle dos processos
       self.controll_process: list(int) = [{ 'before': False, 'after': False } for _ in range(len(self.process_names))]
@@ -26,10 +29,27 @@ class AnalysisProcess(GetProcess):
     with open(self.name_file_with_name_process, 'r') as file:
       self.process_names = [name.strip() for name in file.read().split('\n')]
 
-  
+  # Preenchendo as informações de todo o pc
+  def info_dict_all_pc(self):
+    name = self.name_all_task_pc
+    date_now = datetime.now()
+
+    cpu, memory = self.get_info_pc()
+
+    self.process[name]['cpu_percent'] = cpu
+    self.process[name]['memory'] = memory
+
+    # Atualizar os dados no banco, dependendo do tempo
+    if self.datetime_to_int(date_now) - self.datetime_to_int(self.process[name]['date_updated']) >= self.time_for_update:
+      self.execute_update(name)
+
+      self.process[name]['date_updated'] = date_now
+
+      self.files_updated += 1
+
+
   def make_the_dict_of_process(self):
     process = dict()
-
 
     for name in self.process_names:
       process[name] = dict()
@@ -91,6 +111,8 @@ class AnalysisProcess(GetProcess):
         name = self.process_names[i]
         self.database.end_process(self.process[name]['id'])
         self.process[name] = {}
+
+    self.info_dict_all_pc()
 
   # Função para encerrar os processos caso o programa seja interrompido
   def end_process(self):
