@@ -1,2 +1,0 @@
-dictt = {}
-print(dictt == {})

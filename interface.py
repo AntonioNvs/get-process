@@ -14,16 +14,20 @@ class Interface(AnalysisProcess):
 
     time.clock() # Início do tempo
 
+    # Instanceando a thread do loop de análise de processos
     self._th_process = Thread(target=self.loop_process)
     self._th_process.start()
     
+    # Instanceando a thread responsável em escrever no terminal
     self._th_print_in_screen =Thread(target=self.print_in_screen) 
     self._th_print_in_screen.start()
-
+    
+    # Função de 'exit' do programa
     self.how_can_exit()
 
   def print_in_screen(self):
     while not self.is_exit:
+      # Impressões básicas
       os.system('cls')
       print('Aperte "q" para finalizar o programa!')
       print()
@@ -38,6 +42,7 @@ class Interface(AnalysisProcess):
       number_cpu = int(cpu / 5)
       number_memory = int(memory / 5)
 
+      # Cálculo dos caracteres das barras
       bar_cpu = "#".join(['' for _ in range(number_cpu)]) + "-".join(['' for _ in range(20 - number_cpu)])
       bar_memory = "#".join(['' for _ in range(number_memory)]) + "-".join(['' for _ in range(20 - number_memory)])
 
@@ -63,6 +68,7 @@ class Interface(AnalysisProcess):
 
       time.sleep(1)
 
+  # Subtraindo duas datas a partir do timedelta da lib datetime
   def subtration_beetween_two_datetimes(self, start: datetime, stop: datetime):
     start_delta = timedelta(hours=start.hour, minutes=start.minute, seconds=start.second)
     stop_delta = timedelta(hours=stop.hour, minutes=stop.minute, seconds=stop.second)
@@ -89,6 +95,7 @@ class Interface(AnalysisProcess):
 
   def how_can_exit(self):
     while True:
+      # Se um botão for pressionado, a função retorna um valor
       caracter = m.getch().decode('utf-8')
 
       if caracter == 'e':
@@ -98,6 +105,7 @@ class Interface(AnalysisProcess):
       elif caracter == 'q':
         break
     
+    # Encerrando o processo do programa
     self.is_exit = True
     self.end_process()
     time.sleep(1)

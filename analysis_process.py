@@ -7,7 +7,7 @@ class AnalysisProcess(GetProcess):
   def __init__(self, database: ProcessDatabase) -> None:
       super().__init__()
 
-      self.time_for_update = 90 # Tempo em segundos
+      self.time_for_update = 90 # Tempo de atualziação em segundos
       self.database = database
       self.name_file_with_name_process = 'process_names.txt'
       self.name_all_task_pc = 'all_info_pc'
@@ -17,14 +17,17 @@ class AnalysisProcess(GetProcess):
       self.process_names: list(str) = []
       self.set_process_names()
 
+      # Dicionário das tarefas desejadas
       self.process: dict = self.make_the_dict_of_process()
+
+      # Criação do processo de todo o computador de forma separada
       self.process[self.name_all_task_pc] = self.create_an_empty_dict()
       self.process[self.name_all_task_pc]['id'] = self.database.create_process(self.name_all_task_pc)
 
       # Variável de controle dos processos
       self.controll_process: list(int) = [{ 'before': False, 'after': False } for _ in range(len(self.process_names))]
 
-
+  # Selecionando as tarefas desejadas pelo arquivo de texto
   def set_process_names(self):
     with open(self.name_file_with_name_process, 'r') as file:
       self.process_names = [name.strip() for name in file.read().split('\n')]
@@ -47,7 +50,7 @@ class AnalysisProcess(GetProcess):
 
       self.files_updated += 1
 
-
+  # Criando um dicionário em todos os processos
   def make_the_dict_of_process(self):
     process = dict()
 
@@ -56,6 +59,7 @@ class AnalysisProcess(GetProcess):
 
     return process
 
+  # Dicionário padrão de uma tarefa após ser iniciada
   def create_an_empty_dict(self) -> dict:
     date_now = datetime.now()
 
@@ -64,13 +68,16 @@ class AnalysisProcess(GetProcess):
         'date_updated': date_now
       }
 
+  # Função principal da classe, a qual vai preencher todas as variáveis cadastradas
   def fill_info_about_process(self) -> None:
-    list_info_process = self.get_info_process_active()
+    list_info_process = self.get_info_process_active() # Lista dos processos ativos
 
     for info_process in list_info_process:
       name = info_process['name']
 
+      # Caso o processo desejado esteja na lista dos processos ativos
       if name in self.process_names:
+
         # Caso o processo esteja vazio, crie um novo com os parâmetros
         if self.process[name] == {}:
           self.process[name] = self.create_an_empty_dict()
@@ -94,6 +101,7 @@ class AnalysisProcess(GetProcess):
         if 'id' not in self.process[name]:
           self.process[name]['id'] = self.database.create_process(name)
 
+    # Lista do nome de todos os processos ativos
     name_process_active = [i['name'] for i in list_info_process]
 
     # Controle dos processos, para saber se um ativo foi encerrado
@@ -103,9 +111,9 @@ class AnalysisProcess(GetProcess):
       self.controll_process[i]['after'] = process in name_process_active
 
     for i, activations in enumerate(self.controll_process):
-      # Caso o processo tenha sido encerrado..      
       before, after = [i[1] for i in activations.items()]
 
+      # Caso o processo tenha sido encerrado..
       if before and not after:
         # Atualizando o banco colocando a data de encerramento
         name = self.process_names[i]
@@ -122,9 +130,9 @@ class AnalysisProcess(GetProcess):
       except KeyError:
         pass
 
-
+  # Transformando a classe datetime em um inteiro
   def datetime_to_int(self, date: datetime) -> int:
-    return int(date.strftime('%Y%m%d%H%M%S'))
+    return date.day * 86400 + date.hour * 3600 * date.minute * 60 + date.second
 
   # Após determinado tempo, salve no banco os dados atuais do processo
   def execute_update(self, name_process):
@@ -133,11 +141,3 @@ class AnalysisProcess(GetProcess):
     cpu = self.process[name_process]['cpu_percent']
 
     self.database.create_data_updated_process(memory, cpu, id_process)
-
-
-if __name__ == '__main__':
-  class_process = AnalysisProcess(ProcessDatabase())
-
-  while True:
-    class_process.fill_info_about_process()
-    sleep(1)

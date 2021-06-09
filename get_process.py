@@ -5,7 +5,7 @@ class GetProcess:
 
     self.attrs_info: list(str) = ['name', 'cpu_percent']
 
-
+  # Lista dos processos ativos, com as informações desejadas
   def get_info_process_active(self):
     list_info_about_process = list()
 
@@ -21,9 +21,6 @@ class GetProcess:
 
     return list_info_about_process
 
+  # Informações específicas gerais do computador (CPU e RAM)
   def get_info_pc(self):
     return psutil.cpu_percent(), psutil.virtual_memory().percent
-
-
-if __name__ == "__main__":
-  x = GetProcess()
