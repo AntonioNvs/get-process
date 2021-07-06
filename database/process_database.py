@@ -28,3 +28,17 @@ class ProcessDatabase(Database):
         WHERE id = '{process_id}'
       """
     )
+
+  def list_all_process(self) -> list:
+    return self.select_table(
+      f"""
+        SELECT * FROM process
+      """
+    )
+
+  def list_all_data_process(self) -> list:
+    return self.select_table(
+      f"""
+        SELECT * FROM data_process
+      """
+    )
